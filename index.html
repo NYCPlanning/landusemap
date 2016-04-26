@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
     <link rel="icon" type="image/png" href="./favicon.png">
   </head>
 
@@ -68,15 +68,15 @@
             <a href="#" class="navbar-icon pull-right visible-xs" id="nav-btn"><i class="fa fa-bars fa-lg white"></i></a>
             <a href="#" class="navbar-icon pull-right visible-xs" id="sidebar-toggle-btn"><i class="fa fa-search fa-lg white"></i></a>
           </div>
-          <a class="navbar-brand" href="#">CartoDB Template</a>
+          <a class="navbar-brand" href="#">Land Use Map Clipper</a>
         </div>
         <div class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right" role="search">
+    <!--       <form class="navbar-form navbar-right" role="search">
             <div class="form-group has-feedback">
                 <span class="twitter-typeahead" style="position: static; display: block; direction: ltr;"><input id="searchbox" type="text" placeholder="Search" class="form-control tt-input" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top;"><pre aria-hidden="true" style="position: absolute; visibility: hidden; white-space: pre; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><span class="tt-dropdown-menu" style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none; right: auto;"><div class="tt-dataset-Boroughs"></div><div class="tt-dataset-Theaters"></div><div class="tt-dataset-Museums"></div><div class="tt-dataset-GeoNames"></div></span></span>
                 <span id="searchicon" class="fa fa-search form-control-feedback"></span>
             </div>
-          </form>
+          </form> -->
           <ul class="nav navbar-nav">
             <li><a href="#" data-toggle="collapse" data-target=".navbar-collapse.in" id="about-btn"><i class="fa fa-question-circle white"></i>&nbsp;&nbsp;About</a></li>
             <li class="dropdown">
@@ -105,6 +105,11 @@
 
     <div id="container">
       <div id="sidebar">
+        <div class="row">
+          <div class="col-md-12">
+            <button class="btn btn-info" id="snapshot">Snapshot</button>
+          </div>
+        </div>
         
       </div>
       <div id="map">
@@ -115,18 +120,34 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>
+    <script src="js/leaflet-hash.js"></script>
     <script>
 
     var map = new L.Map('map', { 
-      center: [40.1,-100.3],
-      zoom: 4
+      center: [40.707710,-73.986225],
+      zoom: 13
     });
+
+    //leaflet hash plugin updates the URL with the current map center and zoom level
+    var hash = new L.Hash(map);
+
+    //add mapzen geocoder to allow for address search
+    var options = {
+      latlng: true,
+      position: 'topright',
+      expanded: true
+    }
+
+    L.control.geocoder('search-zTuXMNE', options).addTo(map);
+
 
     L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',{
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
     }).addTo(map);
 
-    var layerUrl = 'http://documentation.cartodb.com/api/v2/viz/236085de-ea08-11e2-958c-5404a6a683d5/viz.json';
+    var layerUrl = 'https://cwhong.cartodb.com/api/v2/viz/c8286874-08c9-11e6-9632-0e3ff518bd15/viz.json';
 
     cartodb.createLayer(map, layerUrl)
       .addTo(map)
@@ -135,6 +156,23 @@
       }).on('error', function() {
         //log the error
       });
+
+
+    $('#snapshot').click(function() {
+      console.log('click!');
+      leafletImage(map, doImage);
+    })
+
+    function doImage(err, canvas) {
+        var img = document.createElement('img');
+        var dimensions = map.getSize();
+        img.width = dimensions.x;
+        img.height = dimensions.y;
+        img.src = canvas.toDataURL();
+        snapshot.innerHTML = '';
+        console.log('appending...')
+        snapshot.appendChild(img);
+    }
 
     </script>
   </body>
