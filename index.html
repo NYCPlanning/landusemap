@@ -57,6 +57,39 @@
     .navbar-inverse .navbar-nav>li>a {
       color: #fff;
     }
+
+    #screenshot-image img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .modal-dialog {
+        width:75%;
+        margin: 30px auto;
+    }
+
+    .modal-static { 
+      position: fixed;
+      top: 50% !important; 
+      left: 50% !important; 
+      margin-top: -100px;  
+      margin-left: -100px; 
+      overflow: visible !important;
+    }
+    .modal-static,
+    .modal-static .modal-dialog,
+    .modal-static .modal-content {
+        width: 200px; 
+        height: 200px; 
+    }
+    .modal-static .modal-dialog,
+    .modal-static .modal-content {
+        padding: 0 !important; 
+        margin: 0 !important;
+    }
+    .modal-static .modal-content .icon {
+    }
+
   </style>
 
   <body>
@@ -107,6 +140,11 @@
       <div id="sidebar">
         <div class="row">
           <div class="col-md-12">
+            <h4>How to Use</h4>
+            <ol>
+              <li>Pan and Zoom the map to find your desired view</li>
+              <li>Click the Screenshot button below</li>
+            </ol>
             <button class="btn btn-info" id="snapshot">Snapshot</button>
           </div>
         </div>
@@ -115,6 +153,43 @@
       <div id="map">
       </div>
 
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Your Land Use Map</h4>
+            </div>
+            <div class="modal-body">
+              <div id="screenshot-image"></div>
+            </div>
+            <div class="modal-footer">
+              <div class="col-md-6">
+                <p id="image-details" class="text-left"></p>
+              </div>
+              <div class="col-md-6">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a type="button" class="btn btn-primary" id="image-download" download="landusemap.png">Download</a>
+              </div>
+              
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Static Modal from http://bootsnipp.com/snippets/featured/centered-processing-modal-->
+      <div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-body">
+                      <div class="text-center">
+                          <img src="http://www.travislayne.com/images/loading.gif" class="icon" />
+                          <h4>Processing...</h4>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div><!-- /.container -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -159,19 +234,42 @@
 
 
     $('#snapshot').click(function() {
-      console.log('click!');
+      $('#processing-modal').modal('show');
       leafletImage(map, doImage);
     })
 
+   
+    
+
     function doImage(err, canvas) {
-        var img = document.createElement('img');
+
+        //var img = document.createElement('img');
         var dimensions = map.getSize();
-        img.width = dimensions.x;
-        img.height = dimensions.y;
-        img.src = canvas.toDataURL();
-        snapshot.innerHTML = '';
-        console.log('appending...')
-        snapshot.appendChild(img);
+        //img.width = dimensions.x;
+        //img.height = dimensions.y;
+        console.log(canvas);
+
+        var context = canvas.getContext("2d");
+        var legend = new Image();
+        legend.src = 'img/legend.png';  
+
+        legend.onload = function() {
+          context.drawImage(legend, dimensions.x - 296 - 10, dimensions.y - 224 - 10);
+
+
+          var dimensionsString = dimensions.x + ' x ' + dimensions.y + ' PNG'
+          var img = new Image();
+          img.src = canvas.toDataURL();
+          $('#image-details').text(dimensionsString)
+          $('#screenshot-image').empty()
+          $('#screenshot-image').append(img);
+           $('#image-download').attr('href', img.src);
+          $('#processing-modal').modal('hide');
+          $('#myModal').modal('show');
+        }
+        
+
+
     }
 
     </script>
